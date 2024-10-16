@@ -1,6 +1,9 @@
 
 <h1 align="center" id="title">Proyecto 2048 - Juego Democrático
 
+<div align="center">
+  <img src="https://assets.abcya.com/webp_a76f3577-78e7-4fb9-9018-e11161475d2a.jpg">
+</div>
 
 ## Tabla de contenidos:
 ---
