@@ -4,9 +4,17 @@
 
 ## Tabla de contenidos:
 ---
+- [Integrantes](#Integrantes)
 - [Descripción](#Descripción)
 - [Objetivos](#Objetivos)
 - [Requisitos](#Requisitos)
+
+## Integrantes:
+- 📫 **[sebastian.saldana@upch.pe](mailto:sebastian.saldana@upch.pe)**
+- 📫 **[dahayra.more@upch.pe](mailto:dahayra.more@upch.pe)**
+- 📫 **[victor.huarcaya@upch.pe](mailto:victor.huarcaya@upch.pe)**
+- 📫 **[valery.siccha@upch.pe](mailto:valery.siccha@upch.pe)**
+- 📫 **[leonardo.mejia.l@upch.pe](mailto:leonardo.mejia.l@upch.pe)**
 
 ## Descripción
 Este proyecto es una adaptación del popular juego 2048, diseñado para ser jugado de manera colaborativa y democrática. Los jugadores pueden votar por los movimientos a realizar en el juego, y el sistema sincroniza las acciones en múltiples computadoras.
