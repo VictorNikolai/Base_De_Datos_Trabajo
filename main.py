@@ -11,9 +11,9 @@ import mysql.connector
 db_connection = mysql.connector.connect(
     host="junction.proxy.rlwy.net",
     user="root",
-    password="GOFabdSxQGCDBwukZDJJpgIRqohPYfvf",
+    password="cKSlugniLLGhRGOsUNIWdIxvuJihNGAh",
     database="DB_PARCIAL",
-    port=29212,
+    port=29128,
     auth_plugin='mysql_native_password'
 )
 cursor = db_connection.cursor()
@@ -22,11 +22,17 @@ cursor = db_connection.cursor()
 pygame.init()
 pygame.mixer.init()
 
+# Variable para el modo de usuario
+modo_usuario = None  # Puede ser 'Jugador' o 'Espectador'
+movimiento_ganador = None
+
 # Crear una ventana para solicitar los datos del usuario y registrarlo en la base de datos
 def user_registration():
+    global id_jugador, modo_usuario  # Definir las variables globales para el ID del jugador y el modo de usuario
+
     # Crear la ventana
     window = tk.Tk()
-    window.geometry("300x200")
+    window.geometry("300x300")
     window.title("Registro de Usuario")
 
     # Etiquetas y campos de entrada
@@ -34,18 +40,30 @@ def user_registration():
     name_entry = tk.Entry(window)
     name_entry.pack(pady=5)
 
+    # Modo de usuario: Jugador o Espectador
+    tk.Label(window, text="Elige el modo:").pack(pady=5)
+    mode_var = tk.StringVar(value="Jugador")
+    tk.Radiobutton(window, text="Jugador", variable=mode_var, value="Jugador").pack()
+    tk.Radiobutton(window, text="Espectador", variable=mode_var, value="Espectador").pack()
+
     # Función para validar y procesar los datos
     def start_game():
+        global id_jugador, modo_usuario  # Definir las variables globales dentro de la función
         name = name_entry.get()
+        modo_usuario = mode_var.get()
 
         if not name:
             messagebox.showerror("Error", "Por favor, ingresa un nombre válido.")
         else:
-            # Registrar el jugador en la base de datos
+            # Registrar el jugador en la base de datos y obtener su id_jugador
             try:
                 cursor.execute("INSERT INTO Jugadores (nombre) VALUES (%s)", (name,))
                 db_connection.commit()
-                print(f"Jugador {name} registrado en la base de datos.")
+
+                # Obtener el id_jugador asignado
+                cursor.execute("SELECT LAST_INSERT_ID()")
+                id_jugador = cursor.fetchone()[0]
+                print(f"Jugador {name} registrado con id_jugador {id_jugador}.")
             except mysql.connector.Error as err:
                 print(f"Error al registrar el jugador: {err}")
             finally:
@@ -64,8 +82,8 @@ def user_registration():
 
 # Lógica del juego 2048
 def main_game(player_name):
-    pygame.mixer.music.load("musica.mp3")
-    pygame.mixer.music.play(-1)
+    #pygame.mixer.music.load("musica.mp3")
+    #pygame.mixer.music.play(-1)
 
     FPS = 60
     WIDTH, HEIGHT = 800, 800
@@ -99,34 +117,35 @@ def main_game(player_name):
             self.time_label = tk.Label(self, text="Tiempo: 0s", font=("Helvetica", 10))
             self.time_label.pack(pady=10)
 
-            # Botones de votación
-            def votar(direccion):
-                try:
-                    cursor.execute(
-                        "INSERT INTO Votos (id_jugador, direccion) VALUES (%s, %s)",
-                        (1, direccion)  # ID del jugador como ejemplo
-                    )
-                    db_connection.commit()
-                    print(f"Voto registrado: {direccion}")
-                except mysql.connector.Error as err:
-                    print(f"Error al guardar el voto: {err}")
-                finally:
-                    cursor.reset()
+            # Solo mostrar botones de votación si el usuario es un jugador
+            if modo_usuario == "Jugador":
+                def votar(direccion):
+                    try:
+                        cursor.execute(
+                            "INSERT INTO Votos (id_jugador, direccion) VALUES (%s, %s)",
+                            (id_jugador, direccion)
+                        )
+                        db_connection.commit()
+                        print(f"Voto registrado: {direccion} para id_jugador {id_jugador}")
+                    except mysql.connector.Error as err:
+                        print(f"Error al guardar el voto: {err}")
+                    finally:
+                        cursor.reset()
 
-            self.up_button = tk.Button(self, text="Arriba", width=10, command=lambda: votar("Arriba"))
-            self.up_button.pack(pady=5)
+                self.up_button = tk.Button(self, text="Arriba", width=10, command=lambda: votar("Arriba"))
+                self.up_button.pack(pady=5)
 
-            self.left_right_frame = tk.Frame(self)
-            self.left_right_frame.pack(pady=10)
+                self.left_right_frame = tk.Frame(self)
+                self.left_right_frame.pack(pady=10)
 
-            self.left_button = tk.Button(self.left_right_frame, text="Izquierda", width=10, command=lambda: votar("Izquierda"))
-            self.left_button.pack(side="left", padx=20)
+                self.left_button = tk.Button(self.left_right_frame, text="Izquierda", width=10, command=lambda: votar("Izquierda"))
+                self.left_button.pack(side="left", padx=20)
 
-            self.right_button = tk.Button(self.left_right_frame, text="Derecha", width=10, command=lambda: votar("Derecha"))
-            self.right_button.pack(side="right", padx=20)
+                self.right_button = tk.Button(self.left_right_frame, text="Derecha", width=10, command=lambda: votar("Derecha"))
+                self.right_button.pack(side="right", padx=20)
 
-            self.down_button = tk.Button(self, text="Abajo", width=10, command=lambda: votar("Abajo"))
-            self.down_button.pack(pady=10)
+                self.down_button = tk.Button(self, text="Abajo", width=10, command=lambda: votar("Abajo"))
+                self.down_button.pack(pady=10)
 
             self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -274,7 +293,7 @@ def main_game(player_name):
                         tile.move(delta)
                     else:
                         next_tile.value *= 2
-                        score += next_tile.value  # Add to score
+                        score += next_tile.value
                         sorted_tiles.pop(i)
                         blocks.add(next_tile)
                 elif move_check(tile, next_tile):
@@ -314,7 +333,6 @@ def main_game(player_name):
     def obtener_movimiento_ganador():
         global movimiento_ganador
         try:
-            # Ejecutar el procedimiento almacenado con multi=True
             for result in cursor.execute("CALL ContabilizarVotos()", multi=True):
                 if result.with_rows:
                     movimiento_ganador = result.fetchone()[0]
@@ -324,7 +342,19 @@ def main_game(player_name):
         finally:
             cursor.reset()
 
-    # Función principal del juego
+    def guardar_resultados_finales(movimiento_ganador, votos_totales, id_ganador, puntaje):
+        try:
+            cursor.execute(
+                "INSERT INTO ResultadosFinales (movimiento_ganador, votos_totales, id_ganador, puntaje) VALUES (%s, %s, %s, %s)",
+                (movimiento_ganador, votos_totales, id_ganador, puntaje)
+            )
+            db_connection.commit()
+            print(f"Resultados finales guardados: {movimiento_ganador}, {votos_totales}, {id_ganador}, {puntaje}")
+        except mysql.connector.Error as err:
+            print(f"Error al guardar los resultados finales: {err}")
+        finally:
+            cursor.reset()
+
     def main(window):
         clock = pygame.time.Clock()
         tiles = generate_tiles()
@@ -337,21 +367,40 @@ def main_game(player_name):
             if result == "lost":
                 elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
                 print(f"Game over! Final Score: {score}, Time played: {elapsed_time}s")
-                score_window.destroy()  # Cerrar la ventana de puntuación
+                score_window.destroy()
                 pygame.quit()
 
         score_window = ScoreWindow(move_callback=handle_move)
         score_window.update()
 
-        # Temporizador de 1 minuto para contabilizar los votos
+        # Definir la función para gestionar la votación y la elección
         def temporizador_votacion():
-            global movimiento_ganador  # Asegurarnos de que estamos trabajando con la variable global
+            global movimiento_ganador
             while True:
-                time.sleep(60)  # Pausa de 1 minuto para el temporizador
-                obtener_movimiento_ganador()  # Obtener el movimiento ganador desde la base de datos
+                # Iniciar el tiempo de votación (actualizar el estado a 'activo')
+                cursor.execute("UPDATE EstadoVotacion SET estado = 'activo'")
+                db_connection.commit()
+                print("Tiempo de votación iniciado (20 segundos).")
+                time.sleep(20)  # Tiempo de votación
+
+                # Finalizar la votación e iniciar la fase de elección (actualizar el estado a 'elección')
+                cursor.execute("UPDATE EstadoVotacion SET estado = 'elección'")
+                db_connection.commit()
+                print("Tiempo de elección iniciado (10 segundos).")
+
+                # Ejecutar el procedimiento almacenado para determinar el movimiento ganador
+                obtener_movimiento_ganador()
+
+                # Sincronizar el movimiento en todas las pantallas si existe un movimiento ganador
                 if movimiento_ganador:
                     handle_move(movimiento_ganador)
-                    movimiento_ganador = None  # Reiniciar el movimiento ganador después de aplicarlo
+                    movimiento_ganador = None
+
+                # Finalizar el tiempo de elección (actualizar el estado a 'finalizado')
+                time.sleep(3)
+                cursor.execute("UPDATE EstadoVotacion SET estado = 'finalizado'")
+                db_connection.commit()
+                print("Votación finalizada. El juego continuará con el siguiente ciclo.")
 
         threading.Thread(target=temporizador_votacion, daemon=True).start()
 
