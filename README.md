@@ -1,4 +1,13 @@
------------------------------------------------------Proyecto 2048 - Juego Democrático-------------------------------------------------
+
+<h1 align="center" id="title">Proyecto 2048 - Juego Democrático
+
+
+## Tabla de contenidos:
+---
+- [Descripción](#Descripción)
+- [Objetivos](#Objetivos)
+- [Requisitos](#Requisitos)
+
 ## Descripción
 Este proyecto es una adaptación del popular juego 2048, diseñado para ser jugado de manera colaborativa y democrática. Los jugadores pueden votar por los movimientos a realizar en el juego, y el sistema sincroniza las acciones en múltiples computadoras.
 
