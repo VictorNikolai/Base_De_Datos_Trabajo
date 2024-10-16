@@ -2,7 +2,7 @@
 <h1 align="center" id="title">Proyecto 2048 - Juego Democrático
 
 <div align="center">
-  <img src="https://assets.abcya.com/webp_a76f3577-78e7-4fb9-9018-e11161475d2a.jpg">
+  <img src="https://www.coolmathgames.com/sites/default/files/styles/mobile_game_image/public/2048_OG-logo.jpg?itok=0MDS7Guo">
 </div>
 
 ## Tabla de contenidos:
